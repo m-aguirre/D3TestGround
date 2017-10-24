@@ -1,9 +1,9 @@
 
 
 var tempData = [
-  {date: 2012-10-10, close: 91.55},
-  {date: 2012-10-11, close: 89.72},
-  {date: 2012-10-12, close: 87.69}
+  {date: '2014-10-10', close: '61.55'},
+  {date: '2014-10-11', close: '59.72'},
+  {date: '2014-9-12', close: '27.69'}
 ]
 
 // var axes = {
@@ -41,9 +41,25 @@ const graph = () => {
     .attr('class', 'viewport')
     .attr('width', 700)
     .attr('height', 450)
-    .style('background-color', 'grey')
-
+//     .append('g')
+//     .attr('class', 'cartesian-plane')
+//     .attr('width', 600)
+//     .attr('height', 400)
+//     .style('background-color', 'blue')
+//     .attr('transform', 'translate(50,' + 0 + ')')
+// //    .style('background-color', 'grey')
 }
+
+
+const plotDataPoints = () => {
+  d3.select('.viewport').selectAll("dot")
+  .data(tempData)
+  .enter().append("circle")
+        .attr("r", 3.5)
+        .attr("cx", (d) => { return x(Date.parse(d.date)); })
+        .attr("cy", (d) => { return d.close });
+}
+
 
 const placeXAxis = () => {
   d3.select('.viewport')
@@ -59,6 +75,28 @@ const placeYAxis = () => {
   .call(yAxis)
 }
 
+/*
+Now we have an svg that contains our graph axes.  Before we begin plotting points,
+we want to make a 'graph area' tht precisely matches with our x and y axes so that
+when we plot, the data points match with the axis ticks
+*/
+
+//going with a different approach, may delete this function later - it doesnt work 
+const placeCartesianPlane = () => {
+  d3.select('.viewport')
+  .append('g')
+//  .attr('class', 'cartesian-plane')
+  .attr('width', 600)
+  .attr('height', 400)
+  .style('background-color', 'blue')
+//  .attr('transform', 'translate(50,50)')
+
+
+}
+
+
 graph();
 placeXAxis();
 placeYAxis();
+plotDataPoints();
+//placeCartesianPlane();
