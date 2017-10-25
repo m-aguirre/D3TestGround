@@ -95,6 +95,7 @@ const calculateRegressionLine = (data) => {
   data.forEach( (d) => {
     var date = d.date;
     var y = +d.close;
+    //number of days between current date and january first
     var x = (Math.floor((Date.parse(date) - Date.parse('2014-01-01'))/86400000));
 
     sumX += x;
@@ -107,12 +108,36 @@ const calculateRegressionLine = (data) => {
   console.log(sumX);
   console.log(sumY);
 
-  b0 = ( ((sumY * sumXSquared) - (sumX * sumXY)) / ((n * sumXSquared) - (sumX * sumX)) );
-  b1 = ( ((n * sumXY) - (sumX * sumY)) / ((n * sumXSquared) - (sumX * sumX)) );
+  var b0 = ( ((sumY * sumXSquared) - (sumX * sumXY)) / ((n * sumXSquared) - (sumX * sumX)) );
+  var b1 = ( ((n * sumXY) - (sumX * sumY)) / ((n * sumXSquared) - (sumX * sumX)) );
 
   console.log(b0);
   console.log(b1);
 
+  //y variables
+  var minClose = d3.min(tempData, (d) => {return d.close});
+  var maxClose = d3.max(tempData, (d) => {return d.close});
+  console.log(minClose);
+  console.log(maxClose);
+
+  // x variables
+  var maxDate;
+  var minDate;
+  var minDateNumeric = d3.min(tempData, (d) => {
+    minDate = d.date;
+    return Math.floor((Date.parse(d.date) - Date.parse('2014-01-01'))/86400000)});
+  var maxDateNumeric = d3.max(tempData, (d) => { return Math.floor((Date.parse(d.date) - Date.parse('2014-01-01'))/86400000)});
+  var startY = b0 + (minDateNumeric * b1);
+  var endY = b0 + (maxDateNumeric * b1);
+
+  console.log(minDate);
+
+  line.start.y = startY;
+//  line.start.x = minDate;
+  line.end.y = endY;
+
+//  line.start.x = minDateNumeric;
+//  line.end.x = maxDateNumeric;
 }
 
 //Now we want to draw a line, then we will use our regression coefficient to
@@ -128,11 +153,11 @@ const drawLine = () => {
   d3.select('.viewport')
   .append('g')
   .append('line')
-  .style('stroke', 'blue')
   .attr('x1', x(Date.parse(line.start.x)))
   .attr('y1', yScale(line.start.y))
   .attr('x2', x(Date.parse(line.end.x)))
   .attr('y2', yScale(line.end.y))
+  .style('stroke', 'blue')
 }
 
 graph();
