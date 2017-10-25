@@ -121,29 +121,20 @@ const calculateRegressionLine = (data) => {
   console.log(maxClose);
 
   // x variables
-  var maxDate;
-  var minDate;
-  var minDateNumeric = d3.min(tempData, (d) => {
-    minDate = d.date;
-    return Math.floor((Date.parse(d.date) - Date.parse('2014-01-01'))/86400000)});
+  //TODO maybe use first date from data set instead of jan1
+  var minDateNumeric = d3.min(tempData, (d) => { return Math.floor((Date.parse(d.date) - Date.parse('2014-01-01'))/86400000)});
   var maxDateNumeric = d3.max(tempData, (d) => { return Math.floor((Date.parse(d.date) - Date.parse('2014-01-01'))/86400000)});
   var startY = b0 + (minDateNumeric * b1);
   var endY = b0 + (maxDateNumeric * b1);
 
-  console.log(minDate);
-
+  //Set line start and end y-coordinates
   line.start.y = startY;
-//  line.start.x = minDate;
   line.end.y = endY;
 
-//  line.start.x = minDateNumeric;
-//  line.end.x = maxDateNumeric;
 }
 
 //Now we want to draw a line, then we will use our regression coefficient to
 //make a proper regression line
-
-
 var line = {
   start: {x: "2014-01-01", y: 3},
   end: {x: "2014-12-31", y: 80 }
@@ -155,6 +146,10 @@ const drawLine = () => {
   .append('line')
   .attr('x1', x(Date.parse(line.start.x)))
   .attr('y1', yScale(line.start.y))
+  .attr('x2', x(Date.parse(line.start.x)))
+  .attr('y2', yScale(line.start.y))
+  .transition()
+  .duration(1000)
   .attr('x2', x(Date.parse(line.end.x)))
   .attr('y2', yScale(line.end.y))
   .style('stroke', 'blue')
