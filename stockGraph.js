@@ -52,7 +52,8 @@ const graph = () => {
 }
 
 const plotDataPoints = () => {
-  d3.select('.viewport').selectAll("circle")
+  d3.select('.viewport')
+  .selectAll("circle")
   .data(tempData)
   .enter().append("circle")
         .attr("r", 3.5)
@@ -76,22 +77,6 @@ const placeYAxis = () => {
   .call(yAxis)
 }
 
-/*
-Now we have an svg that contains our graph axes.  Before we begin plotting points,
-we want to make a 'graph area' tht precisely matches with our x and y axes so that
-when we plot, the data points match with the axis ticks
-*/
-
-//going with a different approach, may delete this function later - it doesnt work
-const placeCartesianPlane = () => {
-  d3.select('.viewport')
-  .append('g')
-//  .attr('class', 'cartesian-plane')
-  .attr('width', 600)
-  .attr('height', 400)
-  .style('background-color', 'blue')
-//  .attr('transform', 'translate(50,50)')
-}
 
 /*
 Want to find the equation y = b0 + b1x1
@@ -130,9 +115,31 @@ const calculateRegressionLine = (data) => {
 
 }
 
+//Now we want to draw a line, then we will use our regression coefficient to
+//make a proper regression line
+
+
+var line = {
+  start: {x: "2014-01-01", y: 3},
+  end: {x: "2014-12-31", y: 80 }
+}
+
+const drawLine = () => {
+  d3.select('.viewport')
+  .append('g')
+  .append('line')
+  .style('stroke', 'blue')
+  .attr('x1', x(Date.parse(line.start.x)))
+  .attr('y1', yScale(line.start.y))
+  .attr('x2', x(Date.parse(line.end.x)))
+  .attr('y2', yScale(line.end.y))
+}
+
 graph();
 placeXAxis();
 placeYAxis();
 plotDataPoints();
 calculateRegressionLine(tempData);
+drawLine();
+
 //placeCartesianPlane();
