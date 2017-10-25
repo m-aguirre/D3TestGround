@@ -163,9 +163,17 @@ const drawRegressionLine = () => {
 const identifyOutliers = (data, sigma) => {
   data.forEach((d) => {
     if(Math.abs(d.close - dataSummary.mean) > sigma) { //one SD for now
-      d.outlier: true;
+      d.outlier = true;
     }
   });
+}
+
+const colorOutliersRed = (data) => {
+  d3.select('.viewport')
+  .selectAll('circle')
+  .style('fill', (d) => { return (d.outlier ? 'red' : 'grey'); })
+  .transition()
+  .duration(1000);
 }
 
 graph();
@@ -180,3 +188,5 @@ var sigma = Math.sqrt(calculateVariance(tempData)); //denotes SD
 
 identifyOutliers(tempData, sigma);
 //now that outliers are identified, we want to change the colors of our data pounts
+
+setTimeout(() => {colorOutliersRed(tempData)}, 1000);
