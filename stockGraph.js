@@ -17,6 +17,9 @@ var tempData = [
   {date: '2014-9-20', close: '56.23'}
 ]
 
+var dataSummary = {
+  mean: 0
+}
 
 // d3.csv('./AAPL.csv', (data) => {
 //   data.forEach( (d) => {
@@ -83,7 +86,7 @@ Want to find the equation y = b0 + b1x1
 where our dependent variable y is the stock price
 and our independent variable is the number of days from the origin
 */
-const calculateRegressionLine = (data) => {
+const calculateRegressionEquation = (data) => {
 
   var sumX = 0;
   var sumY = 0;
@@ -105,20 +108,12 @@ const calculateRegressionLine = (data) => {
     sumYSquared += (y * y);
   });
 
-  console.log(sumX);
-  console.log(sumY);
-
   var b0 = ( ((sumY * sumXSquared) - (sumX * sumXY)) / ((n * sumXSquared) - (sumX * sumX)) );
   var b1 = ( ((n * sumXY) - (sumX * sumY)) / ((n * sumXSquared) - (sumX * sumX)) );
-
-  console.log(b0);
-  console.log(b1);
 
   //y variables
   var minClose = d3.min(tempData, (d) => {return d.close});
   var maxClose = d3.max(tempData, (d) => {return d.close});
-  console.log(minClose);
-  console.log(maxClose);
 
   // x variables
   //TODO maybe use first date from data set instead of jan1
@@ -133,6 +128,15 @@ const calculateRegressionLine = (data) => {
 
 }
 
+const calculateVariance = (data) => {
+  var mean = d3.mean(data, (d) => {return d.close});
+  dataSummary.mean = mean;
+  var sumLeastSquares = data.reduce( (sum, d) => {
+    return (sum + ((d.close - mean) * (d.close - mean)))
+  }, 0)
+  return sumLeastSquares / (Object.keys(data).length - 1);
+}
+
 //Now we want to draw a line, then we will use our regression coefficient to
 //make a proper regression line
 var line = {
@@ -140,7 +144,7 @@ var line = {
   end: {x: "2014-12-31", y: 80 }
 }
 
-const drawLine = () => {
+const drawRegressionLine = () => {
   d3.select('.viewport')
   .append('g')
   .append('line')
@@ -155,11 +159,24 @@ const drawLine = () => {
   .style('stroke', 'blue')
 }
 
+//adds outlier tag to any stock date that is considered an outlier
+const identifyOutliers = (data, sigma) => {
+  data.forEach((d) => {
+    if(Math.abs(d.close - dataSummary.mean) > sigma) { //one SD for now
+      d.outlier: true;
+    }
+  });
+}
+
 graph();
 placeXAxis();
 placeYAxis();
 plotDataPoints();
-calculateRegressionLine(tempData);
-drawLine();
+calculateRegressionEquation(tempData);
+drawRegressionLine();
+console.log(calculateVariance(tempData));
 
-//placeCartesianPlane();
+var sigma = Math.sqrt(calculateVariance(tempData)); //denotes SD
+
+identifyOutliers(tempData, sigma);
+//now that outliers are identified, we want to change the colors of our data pounts
