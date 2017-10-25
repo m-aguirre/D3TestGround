@@ -1,11 +1,30 @@
 
 
+//Will need to set up a server to test the CSV data in chrome, opting to
+//use more dummy data for the time being
+
 var tempData = [
   {date: '2014-10-10', close: '61.55'},
   {date: '2014-4-11', close: '59.72'},
   {date: '2014-9-12', close: '27.69'},
-  {date: '2014-6-20', close: '35.89'}
+  {date: '2014-6-20', close: '35.89'},
+  {date: '2014-7-19', close: '43.96'},
+  {date: '2014-8-4', close: '40.21'},
+  {date: '2014-2-17', close: '38.89'},
+  {date: '2014-6-2', close: '42.29'},
+  {date: '2014-3-14', close: '38.99'},
+  {date: '2014-10-20', close: '63.59'},
+  {date: '2014-9-20', close: '56.23'}
 ]
+
+
+// d3.csv('./AAPL.csv', (data) => {
+//   data.forEach( (d) => {
+//     d.date = d.date;
+//     d.close = +d.close;
+//   })
+//   console.log(data[0])
+// })
 
 var x = d3.scaleTime()
     .domain([
@@ -33,12 +52,14 @@ const graph = () => {
 }
 
 const plotDataPoints = () => {
-  d3.select('.viewport').selectAll("dot")
+  d3.select('.viewport').selectAll("circle")
   .data(tempData)
   .enter().append("circle")
         .attr("r", 3.5)
         .attr("cx", (d) => { return x(Date.parse(d.date)); })
-        .attr("cy", (d) => { return yScale(d.close) });
+        .attr("cy", (d) => { return yScale(d.close) })
+        .style('stroke', 'black')
+        .style('fill', 'none')
 }
 
 const placeXAxis = () => {
@@ -70,13 +91,48 @@ const placeCartesianPlane = () => {
   .attr('height', 400)
   .style('background-color', 'blue')
 //  .attr('transform', 'translate(50,50)')
-
-
 }
 
+/*
+Want to find the equation y = b0 + b1x1
+where our dependent variable y is the stock price
+and our independent variable is the number of days from the origin
+*/
+const calculateRegressionLine = (data) => {
+
+  var sumX = 0;
+  var sumY = 0;
+  var sumXY = 0;
+  var sumXSquared = 0;
+  var sumYSquared = 0;
+  var n = Object.keys(data).length;
+
+  data.forEach( (d) => {
+    var date = d.date;
+    var y = +d.close;
+    var x = (Math.floor((Date.parse(date) - Date.parse('2014-01-01'))/86400000));
+
+    sumX += x;
+    sumY += y;
+    sumXY += (x * y);
+    sumXSquared += (x * x);
+    sumYSquared += (y * y);
+  });
+
+  console.log(sumX);
+  console.log(sumY);
+
+  b0 = ( ((sumY * sumXSquared) - (sumX * sumXY)) / ((n * sumXSquared) - (sumX * sumX)) );
+  b1 = ( ((n * sumXY) - (sumX * sumY)) / ((n * sumXSquared) - (sumX * sumX)) );
+
+  console.log(b0);
+  console.log(b1);
+
+}
 
 graph();
 placeXAxis();
 placeYAxis();
 plotDataPoints();
+calculateRegressionLine(tempData);
 //placeCartesianPlane();
