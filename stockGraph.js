@@ -4,21 +4,33 @@
 //use more dummy data for the time being
 
 var tempData = [
-  {date: '2014-10-10', close: '61.55'},
+  {date: '2014-2-17', close: '38.89'},
+  {date: '2014-3-14', close: '38.99'},
   {date: '2014-4-11', close: '59.72'},
-  {date: '2014-9-12', close: '27.69'},
+  {date: '2014-6-2', close: '42.29'},
   {date: '2014-6-20', close: '35.89'},
   {date: '2014-7-19', close: '43.96'},
   {date: '2014-8-4', close: '40.21'},
-  {date: '2014-2-17', close: '38.89'},
-  {date: '2014-6-2', close: '42.29'},
-  {date: '2014-3-14', close: '38.99'},
-  {date: '2014-10-20', close: '63.59'},
-  {date: '2014-9-20', close: '56.23'}
+  {date: '2014-9-12', close: '27.69'},
+  {date: '2014-9-20', close: '56.23'},
+  {date: '2014-10-10', close: '61.55'},
+  {date: '2014-10-20', close: '63.59'}
 ]
 
 var dataSummary = {
   mean: 0
+}
+
+var delayFactor = 85;
+/*
+Calculates number of milliseconds to delay drawing the regression line and
+data point color changes, based on the number of data points in our data set
+*/
+var millisecondDelay = () => {
+  var ms = 0;
+  for(var i = 0; i < tempData.length; i++)
+    ms +=  delayFactor;
+  return ms;
 }
 
 // d3.csv('./AAPL.csv', (data) => {
@@ -58,25 +70,19 @@ const plotDataPoints = () => {
 var d3ViewPort =  d3.select('.viewport')
 var svg = d3ViewPort.append('svg')
 var dots = svg.append('g')
-//  .selectAll("circle")
 for (var i = 0; i < tempData.length; i++){
   var data = []
   data.push(tempData[i]);
-  console.log(data);
   dots.append("circle")
-  .data(data)
-//  .enter()
+    .data(data)
     .attr("r", 0)
     .attr("cx", (d) => { return x(Date.parse(d.date)) })
     .attr("cy", (d) => { return yScale(d.close) })
     .style('stroke', 'black')
     .style('fill', 'white')
     .transition()
-    .delay(100 * i)
+    .delay(delayFactor * i)
     .attr("r", 3.5)
-        //  .style('opacity', 0)
-        //
-        //  .style('opacity', 1)
       }
 }
 
@@ -93,7 +99,6 @@ const placeYAxis = () => {
   .attr('transform', 'translate(0,' + 0 + ')')
   .call(yAxis)
 }
-
 
 /*
 Want to find the equation y = b0 + b1x1
@@ -193,17 +198,17 @@ const colorOutliersRed = (data) => {
 
 }
 
+calculateRegressionEquation(tempData);
+var sigma = Math.sqrt(calculateVariance(tempData)); //denotes SD
+identifyOutliers(tempData, sigma);
 graph();
 placeXAxis();
 placeYAxis();
 plotDataPoints();
-calculateRegressionEquation(tempData);
-drawRegressionLine();
-console.log(calculateVariance(tempData));
+  setTimeout(() => {drawRegressionLine()}, millisecondDelay());
+//drawRegressionLine();
+setTimeout(() => {colorOutliersRed(tempData)}, millisecondDelay() + 750);
 
-var sigma = Math.sqrt(calculateVariance(tempData)); //denotes SD
 
-identifyOutliers(tempData, sigma);
+
 //now that outliers are identified, we want to change the colors of our data pounts
-
-setTimeout(() => {colorOutliersRed(tempData)}, 1000);
