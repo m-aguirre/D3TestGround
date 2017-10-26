@@ -55,15 +55,29 @@ const graph = () => {
 }
 
 const plotDataPoints = () => {
-  d3.select('.viewport')
-  .selectAll("circle")
-  .data(tempData)
-  .enter().append("circle")
-        .attr("r", 3.5)
-        .attr("cx", (d) => { return x(Date.parse(d.date)); })
-        .attr("cy", (d) => { return yScale(d.close) })
-        .style('stroke', 'black')
-        .style('fill', 'none')
+var d3ViewPort =  d3.select('.viewport')
+var svg = d3ViewPort.append('svg')
+var dots = svg.append('g')
+//  .selectAll("circle")
+for (var i = 0; i < tempData.length; i++){
+  var data = []
+  data.push(tempData[i]);
+  console.log(data);
+  dots.append("circle")
+  .data(data)
+//  .enter()
+    .attr("r", 0)
+    .attr("cx", (d) => { return x(Date.parse(d.date)) })
+    .attr("cy", (d) => { return yScale(d.close) })
+    .style('stroke', 'black')
+    .style('fill', 'white')
+    .transition()
+    .delay(100 * i)
+    .attr("r", 3.5)
+        //  .style('opacity', 0)
+        //
+        //  .style('opacity', 1)
+      }
 }
 
 const placeXAxis = () => {
@@ -156,7 +170,8 @@ const drawRegressionLine = () => {
   .duration(1000)
   .attr('x2', x(Date.parse(line.end.x)))
   .attr('y2', yScale(line.end.y))
-  .style('stroke', 'blue')
+  .style('stroke', 'black')
+  .style('stroke-width', 3)
 }
 
 //adds outlier tag to any stock date that is considered an outlier
@@ -171,9 +186,11 @@ const identifyOutliers = (data, sigma) => {
 const colorOutliersRed = (data) => {
   d3.select('.viewport')
   .selectAll('circle')
-  .style('fill', (d) => { return (d.outlier ? 'red' : 'grey'); })
   .transition()
-  .duration(1000);
+  .duration(1000)
+  .style('stroke', (d) => { return (d.outlier ? 'red' : 'grey'); })
+  .style('fill', (d) => { return (d.outlier ? 'red' : 'grey'); })
+
 }
 
 graph();
