@@ -4,3 +4,9 @@
   margin-left: 10%;
   overflow: visible;
 }
+
+.outlier-info-box {
+  stroke: black;
+  fill: white;
+
+}

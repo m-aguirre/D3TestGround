@@ -97,12 +97,49 @@ for (var i = 0; i < tempData.length; i++){
     .attr("r", 0)
     .attr("cx", (d) => { return x(Date.parse(d.date)) })
     .attr("cy", (d) => { return yScale(d.close) })
+    .attr('close', data[0].close)
+    .attr('date', data[0].date)
+    .attr('outlier', (d) => { return (d.outlier ? true : false)})
+    .on('mouseenter', function() {
+      var dataPoint = d3.select(this);
+      if (dataPoint.attr('outlier') === 'true') {
+        showInfo(dataPoint);
+        }
+      })
+      .on("mouseout", function(d) {
+          d3.select('.viewport')
+          .selectAll('rect').remove()
+          d3.select('.viewport')
+          .selectAll('.outlier-data').remove()
+    })
     .style('stroke', 'black')
     .style('fill', 'white')
     .transition()
     .delay(delayFactor * i)
     .attr("r", 3.5)
       }
+}
+
+const showInfo = (outlier) => {
+  console.log(outlier.attr('date'))
+  var d3ViewPort =  d3.select('.viewport')
+  var svg = d3ViewPort.append('svg')
+  var rect = svg.append('rect')
+//  outlier.append('rect')
+  .attr('class', 'outlier-info-box')
+  .attr('x', outlier.attr('cx'))
+  .attr('y', outlier.attr('cy'))
+  .attr('width', 100)
+  .attr('height', 70)
+  .attr('rx', 5)
+  .attr('ry', 5)
+  svg.append('text')
+  .attr('class', 'outlier-data')
+  .attr("dx", function(d){return +outlier.attr('cx') + 20})
+  .attr("dy", function(d){return +outlier.attr('cy') + 20})
+  .text(outlier.attr('close') + " , " + outlier.attr('date'))
+//  .style('fill', 'black')
+//  .enter()
 }
 
 const placeXAxis = () => {
@@ -213,8 +250,8 @@ const colorOutliersRed = (data) => {
   .selectAll('circle')
   .transition()
   .duration(1000)
-  .style('stroke', (d) => { return (d.outlier ? 'red' : '#bcbcbc'); })
-  .style('fill', (d) => { return (d.outlier ? 'red' : '#bcbcbc'); })
+  .style('stroke', (d) => { return (d.outlier ? '#ff0202' : '#bcbcbc'); })
+  .style('fill', (d) => { return (d.outlier ? '#ff0202' : '#bcbcbc'); })
 }
 
 calculateRegressionEquation(tempData);
