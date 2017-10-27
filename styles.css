@@ -1,5 +1,20 @@
 
+/*.graph-field {
+  width: 200px;
+  height: 200px;
+  background-color: blue;
+}*/
 
+.run-button {
+  width: 17vw;
+  height: 5vh;
+  background-color: purple;
+  color: white;
+  margin: auto;
+  margin-top: 10vh;
+  text-align: center;
+  border-radius: 20px;
+}
 .viewport {
   margin-left: 10%;
   overflow: visible;

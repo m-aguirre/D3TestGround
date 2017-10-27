@@ -127,26 +127,23 @@ const showInfo = (outlier) => {
   var rect = svg.append('rect')
   .attr('width', 115)
   .attr('height', 55)
-//  outlier.append('rect')
   .attr('class', 'outlier-info-box')
   .attr('x', outlier.attr('cx'))
   .attr('y', outlier.attr('cy'))
-
   .attr('rx', 5)
   .attr('ry', 5)
+
   svg.append('text')
   .attr('class', 'outlier-data')
   .attr("dx", function(d){return +outlier.attr('cx') + 10})
   .attr("dy", function(d){return +outlier.attr('cy') + 20})
   .text("Date: " + outlier.attr('date'))
+
   svg.append('text')
   .attr('class', 'outlier-data')
   .attr("dx", function(d){return +outlier.attr('cx') + 10})
   .attr("dy", function(d){return +outlier.attr('cy') + 42.5})
   .text("Close: $" + outlier.attr('close').slice(0,5))
-
-//  .style('fill', 'black')
-//  .enter()
 }
 
 const placeXAxis = () => {
@@ -260,12 +257,15 @@ const colorOutliersRed = (data) => {
   .style('fill', (d) => { return (d.outlier ? '#ff0202' : '#bcbcbc'); })
 }
 
-calculateRegressionEquation(tempData);
-calculateVariance(tempData);
-identifyOutliers(tempData, dataSummary.sd);
-graph();
-placeXAxis();
-placeYAxis();
-plotDataPoints();
-setTimeout(() => {drawRegressionLine()}, millisecondDelay());
-setTimeout(() => {colorOutliersRed(tempData)}, millisecondDelay() + 750);
+const render = () => {
+  d3.select('.viewport').remove();
+  calculateRegressionEquation(tempData);
+  calculateVariance(tempData);
+  identifyOutliers(tempData, dataSummary.sd);
+  graph();
+  placeXAxis();
+  placeYAxis();
+  plotDataPoints();
+  setTimeout(() => {drawRegressionLine()}, millisecondDelay());
+  setTimeout(() => {colorOutliersRed(tempData)}, millisecondDelay() + 750);
+}
