@@ -125,19 +125,26 @@ const showInfo = (outlier) => {
   var d3ViewPort =  d3.select('.viewport')
   var svg = d3ViewPort.append('svg')
   var rect = svg.append('rect')
+  .attr('width', 115)
+  .attr('height', 55)
 //  outlier.append('rect')
   .attr('class', 'outlier-info-box')
   .attr('x', outlier.attr('cx'))
   .attr('y', outlier.attr('cy'))
-  .attr('width', 100)
-  .attr('height', 70)
+
   .attr('rx', 5)
   .attr('ry', 5)
   svg.append('text')
   .attr('class', 'outlier-data')
-  .attr("dx", function(d){return +outlier.attr('cx') + 20})
+  .attr("dx", function(d){return +outlier.attr('cx') + 10})
   .attr("dy", function(d){return +outlier.attr('cy') + 20})
-  .text(outlier.attr('close') + " , " + outlier.attr('date'))
+  .text("Date: " + outlier.attr('date'))
+  svg.append('text')
+  .attr('class', 'outlier-data')
+  .attr("dx", function(d){return +outlier.attr('cx') + 10})
+  .attr("dy", function(d){return +outlier.attr('cy') + 42.5})
+  .text("Close: $" + outlier.attr('close').slice(0,5))
+
 //  .style('fill', 'black')
 //  .enter()
 }
@@ -211,7 +218,6 @@ const calculateVariance = (data) => {
   dataSummary.sd = Math.sqrt(sumLeastSquares / (Object.keys(data).length - 1));
   return sumLeastSquares / (Object.keys(data).length - 1);
 }
-
 
 var line = {
   start: {x: "2014-01-01", y: 3},

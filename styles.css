@@ -10,3 +10,9 @@
   fill: white;
 
 }
+
+.outlier-data {
+  overflow: hidden;
+  color: red;
+  font-size: 14px;
+}
