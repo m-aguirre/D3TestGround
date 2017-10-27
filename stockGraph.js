@@ -17,16 +17,19 @@ var tempData = [
   {date: '2014-10-20', close: '63.59'}
 ]
 tempData = aaplData;
+
+//object to hold summary data for our stock - add more later (quantile, SD, etc)
 var dataSummary = {
-  mean: 0,
   minClosingValue: d3.min(tempData, (d) => {return d.close}),
-  maxClosingValue: d3.max(tempData, (d) => {return d.close})
+  maxClosingValue: d3.max(tempData, (d) => {return d.close}),
+  mean: 0,
+  sd: 0,
+  intercept: 0,
+  regressionCoef: 1
 }
-
- // var minClose = d3.min(tempData, (d) => {return d.close});
- // var maxClose = d3.max(tempData, (d) => {return d.close});
-
+//controls how quickly data points are rendered
 var delayFactor = 8;
+
 /*
 Calculates number of milliseconds to delay drawing the regression line and
 data point color changes, based on the number of data points in our data set
@@ -146,7 +149,6 @@ const calculateRegressionEquation = (data) => {
   var b0 = ( ((sumY * sumXSquared) - (sumX * sumXY)) / ((n * sumXSquared) - (sumX * sumX)) );
   var b1 = ( ((n * sumXY) - (sumX * sumY)) / ((n * sumXSquared) - (sumX * sumX)) );
 
-
   // x variables
   //TODO maybe use first date from data set instead of jan1
   var minDateNumeric = d3.min(tempData, (d) => { return Math.floor((Date.parse(d.date) - Date.parse('2014-01-01'))/86400000)});
@@ -157,6 +159,9 @@ const calculateRegressionEquation = (data) => {
   //Set line start and end y-coordinates
   line.start.y = startY;
   line.end.y = endY;
+  //Set summary regression coef & intercept
+  dataSummary.intercept = b0;
+  dataSummary.regressionCoef = b1;
 
 }
 
@@ -166,11 +171,11 @@ const calculateVariance = (data) => {
   var sumLeastSquares = data.reduce( (sum, d) => {
     return (sum + ((d.close - mean) * (d.close - mean)))
   }, 0)
+  dataSummary.sd = Math.sqrt(sumLeastSquares / (Object.keys(data).length - 1));
   return sumLeastSquares / (Object.keys(data).length - 1);
 }
 
-//Now we want to draw a line, then we will use our regression coefficient to
-//make a proper regression line
+
 var line = {
   start: {x: "2014-01-01", y: 3},
   end: {x: "2014-12-31", y: 80 }
@@ -194,8 +199,10 @@ const drawRegressionLine = () => {
 
 //adds outlier tag to any stock date that is considered an outlier
 const identifyOutliers = (data, sigma) => {
+  sigma = sigma/2;
   data.forEach((d) => {
-    if(Math.abs(d.close - dataSummary.mean) > sigma) { //one SD for now
+    var pointOnLine = ((Math.floor((Date.parse(d.date) - Date.parse('2014-01-01'))/86400000)) * dataSummary.regressionCoef) + dataSummary.intercept;
+    if (+d.close > (pointOnLine + sigma) || +d.close < (pointOnLine - sigma)) {
       d.outlier = true;
     }
   });
@@ -206,22 +213,16 @@ const colorOutliersRed = (data) => {
   .selectAll('circle')
   .transition()
   .duration(1000)
-  .style('stroke', (d) => { return (d.outlier ? 'red' : 'grey'); })
-  .style('fill', (d) => { return (d.outlier ? 'red' : 'grey'); })
-
+  .style('stroke', (d) => { return (d.outlier ? 'red' : '#bcbcbc'); })
+  .style('fill', (d) => { return (d.outlier ? 'red' : '#bcbcbc'); })
 }
 
 calculateRegressionEquation(tempData);
-var sigma = Math.sqrt(calculateVariance(tempData)); //denotes SD
-identifyOutliers(tempData, sigma);
+calculateVariance(tempData);
+identifyOutliers(tempData, dataSummary.sd);
 graph();
 placeXAxis();
 placeYAxis();
 plotDataPoints();
-  setTimeout(() => {drawRegressionLine()}, millisecondDelay());
-//drawRegressionLine();
+setTimeout(() => {drawRegressionLine()}, millisecondDelay());
 setTimeout(() => {colorOutliersRed(tempData)}, millisecondDelay() + 750);
-
-
-
-//now that outliers are identified, we want to change the colors of our data pounts
