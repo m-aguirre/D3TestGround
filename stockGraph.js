@@ -25,7 +25,7 @@ var dataSummary = {
   mean: 0,
   sd: 0,
   intercept: 0,
-  regressionCoef: 1
+  regressionCoef: 0
 }
 //controls how quickly data points are rendered
 var delayFactor = 8;
@@ -67,9 +67,7 @@ var minYdomain = () => {
 }
 
 
-//idea for y-scale: use d3.range or d3.ticks to create array of y-scale arguments
-//want an array of linearly-spaced values from min - 10ish% to max + 10ish%
-//var y = d3.ticks(0,100, 25);
+
 var yScale = d3.scaleLinear()
     .domain([maxYdomain(),minYdomain()])
     .range([0,450]);
@@ -257,7 +255,63 @@ const colorOutliersRed = (data) => {
   .style('fill', (d) => { return (d.outlier ? '#ff0202' : '#bcbcbc'); })
 }
 
+class Test {
+  constructor(data) {
+    this.data = data;
+    this.dataSummary = {
+      minClosingValue: d3.min(this.data, (d) => {return d.close}),
+      maxClosingValue: d3.max(this.data, (d) => {return d.close}),
+      mean: 0,
+      sd: 0,
+      intercept: 0,
+      regressionCoef: 0
+    }
+    //controls speed of animation
+    this.delayFactor = 8;
+
+    //creates linearly spaced scale for x-coordinate
+    this.xScale = d3.scaleTime()
+        .domain([
+          new Date(Date.parse('2014-01-01')),
+          new Date(Date.parse('2015-01-01'))
+        ])
+        .range([0, 600]);
+
+
+    this.yScale = d3.scaleLinear()
+        .domain([maxYdomain(),minYdomain()])
+        .range([0,450]);
+
+    this.xAxis = d3.axisBottom(this.xScale).ticks(14);
+    this.yAxis = d3.axisLeft(this.yScale).ticks(6);
+  }
+  testing() {
+    console.log(maxYdomain());
+  }
+  /*
+  Calculates number of milliseconds to delay drawing the regression line and
+  data point color changes, based on the number of data points in our data set
+  */
+  millisecondDelay() {
+    var ms = 0;
+    for(var i = 0; i < this.data.length; i++)
+      ms +=  delayFactor;
+    return ms;
+  }
+  //Calculate min and max values for y axis, high/low +/- 20%
+  maxYdomain() {
+    return parseInt(this.dataSummary.maxClosingValue) + (parseInt(this.dataSummary.maxClosingValue)/5.0);
+  }
+
+  minYdomain() {
+    return parseInt(this.dataSummary.minClosingValue) - (parseInt(this.dataSummary.minClosingValue)/5.0);
+  }
+
+
+}
+
 const render = () => {
+
   d3.select('.viewport').remove();
   calculateRegressionEquation(tempData);
   calculateVariance(tempData);
@@ -268,4 +322,7 @@ const render = () => {
   plotDataPoints();
   setTimeout(() => {drawRegressionLine()}, millisecondDelay());
   setTimeout(() => {colorOutliersRed(tempData)}, millisecondDelay() + 750);
+  var data = aaplData;
+  var t = new Test(data);
+  t.testing();
 }
