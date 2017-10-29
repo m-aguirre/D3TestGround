@@ -284,9 +284,19 @@ class Test {
 
     this.xAxis = d3.axisBottom(this.xScale).ticks(14);
     this.yAxis = d3.axisLeft(this.yScale).ticks(6);
+
+    this.line = {
+      start: {x: "2014-01-01", y: 0},
+      end: {x: "2014-12-31", y: 0 }
+    }
+
+    this.calculateRegressionEquation(this.data);
+    this.calculateSD(this.data);
+    this.identifyOutliers(this.data, this.dataSummary.sd);
+    this.addViewport();
   }
   testing() {
-    console.log(maxYdomain());
+    console.log(this.dataSummary.mean);
   }
   /*
   Calculates number of milliseconds to delay drawing the regression line and
@@ -298,6 +308,7 @@ class Test {
       ms +=  delayFactor;
     return ms;
   }
+
   //Calculate min and max values for y axis, high/low +/- 20%
   maxYdomain() {
     return parseInt(this.dataSummary.maxClosingValue) + (parseInt(this.dataSummary.maxClosingValue)/5.0);
@@ -305,6 +316,78 @@ class Test {
 
   minYdomain() {
     return parseInt(this.dataSummary.minClosingValue) - (parseInt(this.dataSummary.minClosingValue)/5.0);
+  }
+
+  /*
+  Finds the equation y = b0 + b1x1
+  where our dependent variable y is the stock price
+  and our independent variable is the number of days from the origin
+  */
+  calculateRegressionEquation(data) {
+
+    var sumX = 0;
+    var sumY = 0;
+    var sumXY = 0;
+    var sumXSquared = 0;
+    var sumYSquared = 0;
+    var n = Object.keys(data).length;
+
+    data.forEach( (d) => {
+      var date = d.date;
+      var y = +d.close;
+      //number of days between current date and january first - don't ask where 86400000 came from
+      var x = (Math.floor((Date.parse(date) - Date.parse('2014-01-01'))/86400000));
+      sumX += x;
+      sumY += y;
+      sumXY += (x * y);
+      sumXSquared += (x * x);
+      sumYSquared += (y * y);
+    });
+
+    var b0 = ( ((sumY * sumXSquared) - (sumX * sumXY)) / ((n * sumXSquared) - (sumX * sumX)) );
+    var b1 = ( ((n * sumXY) - (sumX * sumY)) / ((n * sumXSquared) - (sumX * sumX)) );
+
+    // x variables
+    //TODO maybe use first date from data set instead of jan1
+    var minDateNumeric = d3.min(tempData, (d) => { return Math.floor((Date.parse(d.date) - Date.parse('2014-01-01'))/86400000)});
+    var maxDateNumeric = d3.max(tempData, (d) => { return Math.floor((Date.parse(d.date) - Date.parse('2014-01-01'))/86400000)});
+    var startY = b0 + (minDateNumeric * b1);
+    var endY = b0 + (maxDateNumeric * b1);
+
+    //Set line start and end y-coordinates
+    this.line.start.y = startY;
+    this.line.end.y = endY;
+    //Set summary regression coef & intercept
+    this.dataSummary.intercept = b0;
+    this.dataSummary.regressionCoef = b1;
+  }
+
+  calculateSD(data) {
+    var mean = d3.mean(data, (d) => {return d.close});
+    this.dataSummary.mean = mean;
+    var sumLeastSquares = data.reduce( (sum, d) => {
+      return (sum + ((d.close - mean) * (d.close - mean)))
+    }, 0)
+    return Math.sqrt(sumLeastSquares / (Object.keys(data).length - 1));
+  }
+
+  //adds outlier tag to any stock date that is considered an outlier
+  identifyOutliers(data, sigma) {
+    sigma = sigma/2;
+    data.forEach((d) => {
+      var pointOnLine = ((Math.floor((Date.parse(d.date) - Date.parse('2014-01-01'))/86400000)) * this.dataSummary.regressionCoef) + this.dataSummary.intercept;
+      if (+d.close > (pointOnLine + sigma) || +d.close < (pointOnLine - sigma)) {
+        d.outlier = true;
+      }
+    });
+  }
+
+  addViewport() {
+    d3.select('body')
+      .append('svg')
+      .attr('class', 'viewport')
+      .attr('width', 700)
+      .attr('height', 450)
   }
 
 
