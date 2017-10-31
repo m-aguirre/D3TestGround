@@ -152,6 +152,7 @@ class OutlierDetector {
   var d3ViewPort =  d3.select('.viewport')
   var svg = d3ViewPort.append('svg')
   var dots = svg.append('g')
+  var that = this;
   for (var i = 0; i < this.data.length; i++){
     var data = []
     data.push(this.data[i]);
@@ -166,7 +167,7 @@ class OutlierDetector {
       .on('mouseenter', function() {
         var dataPoint = d3.select(this);
         if (dataPoint.attr('outlier') === 'true') {
-          showInfo(dataPoint);
+          that.showInfo(dataPoint);
           }
         })
         .on("mouseout", function(d) {
@@ -210,6 +211,31 @@ class OutlierDetector {
     .style('fill', (d) => { return (d.outlier ? '#ff0202' : '#bcbcbc'); })
   }
 
+
+showInfo(outlier) {
+  var d3ViewPort =  d3.select('.viewport')
+  var svg = d3ViewPort.append('svg')
+  var rect = svg.append('rect')
+  .attr('width', 115)
+  .attr('height', 55)
+  .attr('class', 'outlier-info-box')
+  .attr('x', outlier.attr('cx'))
+  .attr('y', outlier.attr('cy'))
+  .attr('rx', 5)
+  .attr('ry', 5)
+
+  svg.append('text')
+  .attr('class', 'outlier-data')
+  .attr("dx", function(d){return +outlier.attr('cx') + 10})
+  .attr("dy", function(d){return +outlier.attr('cy') + 20})
+  .text("Date: " + outlier.attr('date'))
+
+  svg.append('text')
+  .attr('class', 'outlier-data')
+  .attr("dx", function(d){return +outlier.attr('cx') + 10})
+  .attr("dy", function(d){return +outlier.attr('cy') + 42.5})
+  .text("Close: $" + outlier.attr('close').slice(0,5))
+  }
 }
 
 const render = () => {
