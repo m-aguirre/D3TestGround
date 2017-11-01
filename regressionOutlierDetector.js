@@ -114,12 +114,15 @@ class OutlierDetector {
 
   //adds outlier tag to any stock date that is considered an outlier
   identifyOutliers(data, sigma) {
-    sigma = sigma/2;
+    sigma = sigma * 0.5  ;
+    var days =0;
     data.forEach((d) => {
       var pointOnLine = ((Math.floor((Date.parse(d.date) - Date.parse('2014-01-01'))/86400000)) * this.dataSummary.regressionCoef) + this.dataSummary.intercept;
+      //var pointOnLine = (days * this.dataSummary.regressionCoef) + this.dataSummary.intercept;
       if (+d.close > (pointOnLine + sigma) || +d.close < (pointOnLine - sigma)) {
         d.outlier = true;
       }
+      days++;
     });
   }
 
@@ -170,7 +173,7 @@ class OutlierDetector {
           that.showInfo(dataPoint);
           }
         })
-        .on("mouseout", function(d) {
+        .on("mouseout", function() {
             d3.select('.viewport')
             .selectAll('rect').remove()
             d3.select('.viewport')
@@ -211,28 +214,33 @@ class OutlierDetector {
     .style('fill', (d) => { return (d.outlier ? '#ff0202' : '#bcbcbc'); })
   }
 
-
 showInfo(outlier) {
+  var cx;
+  if (outlier.attr('cx') > 350) {
+    cx = outlier.attr('cx') - 115;
+  } else {
+    cx = outlier.attr('cx');
+  }
   var d3ViewPort =  d3.select('.viewport')
   var svg = d3ViewPort.append('svg')
   var rect = svg.append('rect')
   .attr('width', 115)
   .attr('height', 55)
   .attr('class', 'outlier-info-box')
-  .attr('x', outlier.attr('cx'))
+  .attr('x', cx)
   .attr('y', outlier.attr('cy'))
   .attr('rx', 5)
   .attr('ry', 5)
 
   svg.append('text')
   .attr('class', 'outlier-data')
-  .attr("dx", function(d){return +outlier.attr('cx') + 10})
+  .attr("dx", function(d){return cx + 10})
   .attr("dy", function(d){return +outlier.attr('cy') + 20})
   .text("Date: " + outlier.attr('date'))
 
   svg.append('text')
   .attr('class', 'outlier-data')
-  .attr("dx", function(d){return +outlier.attr('cx') + 10})
+  .attr("dx", function(d){return cx + 10})
   .attr("dy", function(d){return +outlier.attr('cy') + 42.5})
   .text("Close: $" + outlier.attr('close').slice(0,5))
   }
