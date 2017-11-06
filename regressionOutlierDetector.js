@@ -1,4 +1,5 @@
 
+
 class OutlierDetector {
   constructor(data) {
     this.data = data;
