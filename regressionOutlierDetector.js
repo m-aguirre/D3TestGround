@@ -253,3 +253,13 @@ const render = () => {
   var graph = new OutlierDetector(data);
   graph.plotDataPoints();
 }
+
+const renderOneMonth = () => {
+  d3.select('.viewport').remove();
+  var data = [];
+  for (var i = aaplData.length - 30; i < aaplData.length; i++) {
+    data.push(aaplData[i]);
+  }
+  var graph = new OutlierDetector(data);
+  graph.plotDataPoints();
+}
