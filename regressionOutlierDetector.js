@@ -1,7 +1,7 @@
 
 
 class OutlierDetector {
-  constructor(data) {
+  constructor(data, currentDate, daysToSubtract) {
     this.data = data;
     this.dataSummary = {
       minClosingValue: d3.min(this.data, (d) => {return d.close}),
@@ -13,12 +13,12 @@ class OutlierDetector {
     }
     //controls speed of animation
     this.delayFactor = 8;
-
+    this.endDate = currentDate;
     //creates linearly spaced scale for x-coordinate
     this.xScale = d3.scaleTime()
         .domain([
-          new Date(Date.parse('2014-01-01')),
-          new Date(Date.parse('2015-01-01'))
+          new Date(Date.parse(this.calculateStartDate(this.endDate, daysToSubtract))),
+          new Date(Date.parse(currentDate))
         ])
         .range([0, 600]);
 
@@ -39,6 +39,15 @@ class OutlierDetector {
     this.calculateSD(this.data);
     this.identifyOutliers(this.data, this.dataSummary.sd);
     this.addViewport();
+  }
+  calculateStartDate(endDate, daysToSubtract) {
+    var date = new Date('2015-01-01');
+    console.log('date: ', date);
+    var x = date.setDate(date.getDate() - 30);
+    //console.log(x.toISOString());
+    var dd = new Date(x);
+    console.log(dd.toISOString());
+    return dd;
   }
 
   /*
@@ -260,6 +269,6 @@ const renderOneMonth = () => {
   for (var i = aaplData.length - 30; i < aaplData.length; i++) {
     data.push(aaplData[i]);
   }
-  var graph = new OutlierDetector(data);
+  var graph = new OutlierDetector(data, '2015-01-01', 30);
   graph.plotDataPoints();
 }
