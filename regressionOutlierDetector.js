@@ -16,14 +16,8 @@ class OutlierDetector {
     this.endDate = currentDate;
 
     this.xcoord = new DateScale(currentDate, daysToSubtract);
-    //creates linearly spaced scale for x-coordinate
-    // this.xScale = d3.scaleTime()
-    //     .domain([
-    //       new Date(Date.parse(this.calculateStartDate(this.endDate, daysToSubtract))),
-    //       new Date(Date.parse(currentDate))
-    //     ])
-    //     .range([0, 600]);
     this.xScale = this.xcoord.xScale;
+    console.log(this.xcoord.startDate.toISOString());
     //creates y scale based on min and max closing prices
     this.yScale = d3.scaleLinear()
         .domain([this.maxYdomain(),this.minYdomain()])
@@ -33,8 +27,8 @@ class OutlierDetector {
     this.yAxis = d3.axisLeft(this.yScale).ticks(6);
 
     this.line = {
-      start: {x: "2014-01-01", y: 0},
-      end: {x: "2014-12-31", y: 0 }
+      start: {x: this.xcoord.startDate, y: 0},
+      end: {x: this.endDate, y: 0 }
     }
 
     this.calculateRegressionEquation(this.data);
@@ -86,7 +80,7 @@ class OutlierDetector {
       var date = d.date;
       var y = +d.close;
       //number of days between current date and january first - don't ask where 86400000 came from
-      var x = (Math.floor((Date.parse(date) - Date.parse('2014-01-01'))/86400000));
+      var x = (Math.floor((Date.parse(date) - Date.parse(this.xcoord.startDate.toISOString()))/86400000));
       sumX += x;
       sumY += y;
       sumXY += (x * y);
@@ -98,8 +92,8 @@ class OutlierDetector {
     var b1 = ( ((n * sumXY) - (sumX * sumY)) / ((n * sumXSquared) - (sumX * sumX)) );
 
     // x variables
-    var minDateNumeric = d3.min(this.data, (d) => { return Math.floor((Date.parse(d.date) - Date.parse('2014-01-01'))/86400000)});
-    var maxDateNumeric = d3.max(this.data, (d) => { return Math.floor((Date.parse(d.date) - Date.parse('2014-01-01'))/86400000)});
+    var minDateNumeric = d3.min(this.data, (d) => { return Math.floor((Date.parse(d.date) - Date.parse(this.xcoord.startDate.toISOString()))/86400000)});
+    var maxDateNumeric = d3.max(this.data, (d) => { return Math.floor((Date.parse(d.date) - Date.parse(this.xcoord.startDate.toISOString()))/86400000)});
     var startY = b0 + (minDateNumeric * b1);
     var endY = b0 + (maxDateNumeric * b1);
 
@@ -122,10 +116,10 @@ class OutlierDetector {
 
   //adds outlier tag to any stock date that is considered an outlier
   identifyOutliers(data, sigma) {
-    sigma = sigma * 0.5  ;
+    sigma = sigma * .5  ;
     var days =0;
     data.forEach((d) => {
-      var pointOnLine = ((Math.floor((Date.parse(d.date) - Date.parse('2014-01-01'))/86400000)) * this.dataSummary.regressionCoef) + this.dataSummary.intercept;
+      var pointOnLine = ((Math.floor((Date.parse(d.date) - Date.parse(this.xcoord.startDate.toISOString()))/86400000)) * this.dataSummary.regressionCoef) + this.dataSummary.intercept;
       //var pointOnLine = (days * this.dataSummary.regressionCoef) + this.dataSummary.intercept;
       if (+d.close > (pointOnLine + sigma) || +d.close < (pointOnLine - sigma)) {
         d.outlier = true;
