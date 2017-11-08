@@ -14,20 +14,22 @@ class OutlierDetector {
     //controls speed of animation
     this.delayFactor = 8;
     this.endDate = currentDate;
-    //creates linearly spaced scale for x-coordinate
-    this.xScale = d3.scaleTime()
-        .domain([
-          new Date(Date.parse(this.calculateStartDate(this.endDate, daysToSubtract))),
-          new Date(Date.parse(currentDate))
-        ])
-        .range([0, 600]);
 
+    this.xcoord = new DateScale(currentDate, daysToSubtract);
+    //creates linearly spaced scale for x-coordinate
+    // this.xScale = d3.scaleTime()
+    //     .domain([
+    //       new Date(Date.parse(this.calculateStartDate(this.endDate, daysToSubtract))),
+    //       new Date(Date.parse(currentDate))
+    //     ])
+    //     .range([0, 600]);
+    this.xScale = this.xcoord.xScale;
     //creates y scale based on min and max closing prices
     this.yScale = d3.scaleLinear()
         .domain([this.maxYdomain(),this.minYdomain()])
         .range([0,450]);
 
-    this.xAxis = d3.axisBottom(this.xScale).ticks(14);
+    this.xAxis = d3.axisBottom(this.xScale).ticks(this.xcoord.numTicks);
     this.yAxis = d3.axisLeft(this.yScale).ticks(6);
 
     this.line = {
@@ -41,13 +43,9 @@ class OutlierDetector {
     this.addViewport();
   }
   calculateStartDate(endDate, daysToSubtract) {
-    var date = new Date('2015-01-01');
-    console.log('date: ', date);
-    var x = date.setDate(date.getDate() - 30);
-    //console.log(x.toISOString());
-    var dd = new Date(x);
-    console.log(dd.toISOString());
-    return dd;
+    var date = new Date(endDate);
+    date.setDate(date.getDate() - daysToSubtract);
+    return new Date(date);
   }
 
   /*
