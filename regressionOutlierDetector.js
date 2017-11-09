@@ -75,6 +75,7 @@ class OutlierDetector {
       var y = +d.close;
       //number of days between current date and january first - don't ask where 86400000 came from
       var x = (Math.floor((Date.parse(date) - Date.parse(this.xcoord.startDate.toISOString()))/86400000));
+      console.log('x is: ' , x);
       sumX += x;
       sumY += y;
       sumXY += (x * y);
@@ -116,6 +117,7 @@ class OutlierDetector {
       var pointOnLine = ((Math.floor((Date.parse(d.date) - Date.parse(this.xcoord.startDate.toISOString()))/86400000)) * this.dataSummary.regressionCoef) + this.dataSummary.intercept;
       //var pointOnLine = (days * this.dataSummary.regressionCoef) + this.dataSummary.intercept;
       if (+d.close > (pointOnLine + sigma) || +d.close < (pointOnLine - sigma)) {
+        console.log(d.close , ' is ', sigma, ' distance from ', pointOnLine, ' at date ', d.date);
         d.outlier = true;
       }
       days++;
@@ -249,6 +251,8 @@ const render = () => {
   graph.plotDataPoints();
 }
 
+//TODO: create range of valid dates, iterate over entire aaplData array and push
+//valid dates into data array
 const renderOneMonth = (daysToSubtract) => {
   d3.select('.viewport').remove();
   var data = [];
