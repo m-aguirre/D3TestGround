@@ -17,12 +17,11 @@ class OutlierDetector {
 
     this.xcoord = new DateScale(currentDate, daysToSubtract);
     this.xScale = this.xcoord.xScale;
-    console.log(this.xcoord.startDate.toISOString());
+
     //creates y scale based on min and max closing prices
     this.yScale = d3.scaleLinear()
         .domain([this.maxYdomain(),this.minYdomain()])
         .range([0,450]);
-
     this.xAxis = d3.axisBottom(this.xScale).ticks(this.xcoord.numTicks);
     this.yAxis = d3.axisLeft(this.yScale).ticks(6);
 
@@ -35,11 +34,6 @@ class OutlierDetector {
     this.calculateSD(this.data);
     this.identifyOutliers(this.data, this.dataSummary.sd);
     this.addViewport();
-  }
-  calculateStartDate(endDate, daysToSubtract) {
-    var date = new Date(endDate);
-    date.setDate(date.getDate() - daysToSubtract);
-    return new Date(date);
   }
 
   /*
@@ -255,12 +249,14 @@ const render = () => {
   graph.plotDataPoints();
 }
 
-const renderOneMonth = () => {
+const renderOneMonth = (daysToSubtract) => {
   d3.select('.viewport').remove();
   var data = [];
-  for (var i = aaplData.length - 30; i < aaplData.length; i++) {
-    data.push(aaplData[i]);
+  for (var i = aaplData.length - daysToSubtract; i < aaplData.length; i++) {
+    if (aaplData[i] != null) {
+      data.push(aaplData[i]);
+    }
   }
-  var graph = new OutlierDetector(data, '2015-01-01', 30);
+  var graph = new OutlierDetector(data, '2015-01-01', daysToSubtract);
   graph.plotDataPoints();
 }
