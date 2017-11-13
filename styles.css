@@ -21,6 +21,11 @@
   overflow: visible;
 }
 
+.graph-field {
+  width: 100%;
+  height: 500px;
+}
+
 .outlier-info-box {
   stroke: black;
   fill: white;
@@ -31,4 +36,8 @@
   overflow: hidden;
   color: red;
   font-size: 14px;
+}
+
+.button-container {
+  display: flex;
 }

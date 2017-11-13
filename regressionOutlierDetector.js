@@ -30,7 +30,6 @@ class OutlierDetector {
       start: {x: this.xcoord.startDate, y: 0},
       end: {x: this.endDate, y: 0 }
     }
-    console.log(this.data);
     this.calculateRegressionEquation(this.data);
     this.calculateSD(this.data);
     this.identifyOutliers(this.data, this.dataSummary.sd);
@@ -120,7 +119,6 @@ class OutlierDetector {
       var pointOnLine = ((Math.floor((Date.parse(d.date) - Date.parse(this.xcoord.startDate.toISOString()))/86400000)) * this.dataSummary.regressionCoef) + this.dataSummary.intercept;
       //var pointOnLine = (days * this.dataSummary.regressionCoef) + this.dataSummary.intercept;
       if (+d.close > (pointOnLine + sigma) || +d.close < (pointOnLine - sigma)) {
-        console.log(d.close , ' is ', sigma, ' distance from ', pointOnLine, ' at date ', d.date);
         d.outlier = true;
       }
       days++;
@@ -128,7 +126,7 @@ class OutlierDetector {
   }
 
   addViewport() {
-    d3.select('body')
+    d3.select('.graph-field')
       .append('svg')
       .attr('class', 'viewport')
       .attr('width', 700)
