@@ -251,29 +251,24 @@ const render = () => {
   graph.plotDataPoints();
 }
 
-// const createDateRange = (daysToSubtract) => {
-//   var currentDate = '2015-01-01';
-//   var beginningDate = Date(currentDate)
-// }
-
 const calculateStartDate = (endDate, daysToSubtract) => {
   var date = new Date(endDate);
   date.setDate(date.getDate() - daysToSubtract);
   return new Date(date);
 }
-//TODO: create range of valid dates, iterate over entire aaplData array and push
-//valid dates into data array
+
 const renderOneMonth = (daysToSubtract) => {
   d3.select('.viewport').remove();
   var startDate = calculateStartDate('2015-01-01', daysToSubtract);
   //console.log(startDate);
   var data = [];
-  console.log('date ', new Date(aaplData[250].date).getDate() > startDate.getDate())
+  console.log('date ', new Date(aaplData[250].date).valueOf() > startDate.valueOf())
   console.log(aaplData[250])
   console.log(startDate);
-  for (var i = aaplData.length - daysToSubtract; i < aaplData.length; i++) {
-    if (aaplData[i] != null && new Date(aaplData[i].date).getDate() > startDate.getDate()) {
-      console.log(aaplData[i].date);
+  for (var i = 0; i < aaplData.length; i++) {
+    if (aaplData[i] != null && new Date(aaplData[i].date).valueOf() > startDate.valueOf() ) {
+
+      console.log(aaplData[i].date, ' is greater than ', startDate.getDate());
       data.push(aaplData[i]);
     }
   }
