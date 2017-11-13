@@ -11,6 +11,7 @@ class OutlierDetector {
       intercept: 0,
       regressionCoef: 0
     }
+    this.daysToSubtract = daysToSubtract;
     //controls speed of animation
     this.delayFactor = 8;
     this.endDate = currentDate;
@@ -29,7 +30,7 @@ class OutlierDetector {
       start: {x: this.xcoord.startDate, y: 0},
       end: {x: this.endDate, y: 0 }
     }
-
+    console.log(this.data);
     this.calculateRegressionEquation(this.data);
     this.calculateSD(this.data);
     this.identifyOutliers(this.data, this.dataSummary.sd);
@@ -75,7 +76,6 @@ class OutlierDetector {
       var y = +d.close;
       //number of days between current date and january first - don't ask where 86400000 came from
       var x = (Math.floor((Date.parse(date) - Date.parse(this.xcoord.startDate.toISOString()))/86400000));
-      console.log('x is: ' , x);
       sumX += x;
       sumY += y;
       sumXY += (x * y);
@@ -111,8 +111,11 @@ class OutlierDetector {
 
   //adds outlier tag to any stock date that is considered an outlier
   identifyOutliers(data, sigma) {
-    sigma = sigma * .5  ;
-    var days =0;
+    sigma = sigma;
+    if (this.daysToSubtract === 365) {
+      sigma = sigma * 0.5;
+    }
+    var days = 0;
     data.forEach((d) => {
       var pointOnLine = ((Math.floor((Date.parse(d.date) - Date.parse(this.xcoord.startDate.toISOString()))/86400000)) * this.dataSummary.regressionCoef) + this.dataSummary.intercept;
       //var pointOnLine = (days * this.dataSummary.regressionCoef) + this.dataSummary.intercept;
@@ -260,16 +263,11 @@ const calculateStartDate = (endDate, daysToSubtract) => {
 const renderOneMonth = (daysToSubtract) => {
   d3.select('.viewport').remove();
   var startDate = calculateStartDate('2015-01-01', daysToSubtract);
-  //console.log(startDate);
   var data = [];
-  console.log('date ', new Date(aaplData[250].date).valueOf() > startDate.valueOf())
-  console.log(aaplData[250])
-  console.log(startDate);
+  //TODO add upper bound
   for (var i = 0; i < aaplData.length; i++) {
-    if (aaplData[i] != null && new Date(aaplData[i].date).valueOf() > startDate.valueOf() ) {
-
-      console.log(aaplData[i].date, ' is greater than ', startDate.getDate());
-      data.push(aaplData[i]);
+    if (aaplData[i] != null && new Date(aaplData[i].date).valueOf() > startDate.valueOf()) {
+      data.push(Object.create(aaplData[i]));
     }
   }
   var graph = new OutlierDetector(data, '2015-01-01', daysToSubtract);
